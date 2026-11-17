@@ -11,7 +11,7 @@ export default function ProductCard({ product }: ProductCardProps) {
   const {toggleWishlist, isInWishlist} = useWishlist();
   const isLiked = isInWishlist(product._id);
   return (
-    <Link href={`/`} asChild>
+    <Link href={{ pathname: "/product/[id]", params: { id: product._id } }} asChild>
       <TouchableOpacity className="w-[48%] mb-4 bg-gray-200 rounded-lg overflow-hidden">
         <View className="relative h-56 w-full bg-gray-100">
           <Image

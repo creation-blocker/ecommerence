@@ -26,7 +26,9 @@ export default function Home() {
   const [activeBannerIndex, setActiveBannerIndex] = useState(0);
   const bannerScrollRef = useRef<ScrollViewInstance | null>(null);
   const [products, setProducts] = useState<Product[]>([]);
+  // const [visibleProductCount, setVisibleProductCount] = useState(10);
   const [loading, setLoading] = useState(true);
+  const hasLoadedMoreRef = useRef(false);
   const catogries = [{ id: "all", name: "All", icon: "grid" }, ...CATEGORIES];
 
   useEffect(() => {
@@ -52,7 +54,33 @@ export default function Home() {
   return (
     <SafeAreaView className="flex-1 bg-white" edges={["top"]}>
       <Header showMenu showLogo showCart />
-      <ScrollView className="flex-1 px-4" showsVerticalScrollIndicator={false}>
+      <ScrollView
+        className="flex-1 px-4"
+        showsVerticalScrollIndicator={false}
+        scrollEventThrottle={16}
+        onScroll={(event) => {
+          const { contentOffset, contentSize, layoutMeasurement } =
+            event.nativeEvent;
+          const isNearBottom =
+            contentOffset.y + layoutMeasurement.height >= contentSize.height - 100;
+
+          if (!isNearBottom) {
+            hasLoadedMoreRef.current = false;
+            return;
+          }
+
+          // if (
+          //   !hasLoadedMoreRef.current &&
+          //   !loading &&
+          //   visibleProductCount < products.length
+          // ) {
+          //   hasLoadedMoreRef.current = true;
+          //   setVisibleProductCount((count) =>
+          //     Math.min(count + 10, products.length),
+          //   );
+          // }
+        }}
+      >
         <View className="mb-6">
           {/* Banner Slider */}
           <ScrollView
@@ -131,7 +159,7 @@ export default function Home() {
                 isSelected={false}
                 onPress={() =>
                   router.push({
-                    pathname: "/",
+                    pathname: "/", //To Fix
                     params: { catogry: cat.id === "all" ? "" : cat.name },
                   })
                 }
@@ -143,7 +171,7 @@ export default function Home() {
         <View className="mb-4">
           <View className="flex-row justify-between items-center mb-4">
             <Text className="text-xl font-bold text-primary">Popular</Text>
-            <TouchableOpacity onPress={() => router.push('/')}>
+            <TouchableOpacity onPress={() => router.push('/',)}> 
               <Text className="text-secondary text-sm">See All</Text>
             </TouchableOpacity>
           </View>
