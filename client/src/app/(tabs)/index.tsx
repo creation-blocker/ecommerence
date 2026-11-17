@@ -6,11 +6,12 @@ import {
   Text,
   TouchableOpacity,
   ActivityIndicator,
+  type ScrollViewInstance,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Header from "../../../components/Header";
 import { BANNERS, dummyProducts } from "@/assets/assets";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "expo-router";
 import { CATEGORIES } from "../../../constants";
 import CategoryItem from "../../../components/CategoryItem";
@@ -18,11 +19,12 @@ import { Product } from "../../../constants/types";
 import ProductCard from "../../../components/ProductCard";
 
 const { width } = Dimensions.get("window");
-const bannerWidth = width - 32;
+const bannerWidth = width - 29;
 
 export default function Home() {
   const router = useRouter();
   const [activeBannerIndex, setActiveBannerIndex] = useState(0);
+  const bannerScrollRef = useRef<ScrollViewInstance | null>(null);
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const catogries = [{ id: "all", name: "All", icon: "grid" }, ...CATEGORIES];
@@ -32,6 +34,21 @@ export default function Home() {
     setLoading(false);
   }, []);
 
+  useEffect(() => {
+    if (BANNERS.length < 2) return;
+
+    const interval = setInterval(() => {
+      const nextIndex = (activeBannerIndex + 1) % BANNERS.length;
+      setActiveBannerIndex(nextIndex);
+      bannerScrollRef.current?.scrollTo({
+        x: nextIndex * bannerWidth,
+        animated: true,
+      });
+    }, 3000);
+
+    return () => clearInterval(interval);
+  }, [activeBannerIndex]);
+
   return (
     <SafeAreaView className="flex-1 bg-white" edges={["top"]}>
       <Header showMenu showLogo showCart />
@@ -39,10 +56,17 @@ export default function Home() {
         <View className="mb-6">
           {/* Banner Slider */}
           <ScrollView
+            ref={bannerScrollRef}
             horizontal
             pagingEnabled
             showsHorizontalScrollIndicator={false}
             className="w-full h-48 rounded-xl"
+            style={{
+              width: bannerWidth,
+              height: 192,
+              borderRadius: 12,
+              overflow: "hidden",
+            }}
             scrollEventThrottle={16}
             onMomentumScrollEnd={(event) =>
               setActiveBannerIndex(
